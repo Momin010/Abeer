@@ -15,76 +15,78 @@ export default function App() {
   const [candlesLit, setCandlesLit] = useState(true);
   const [flameStrength, setFlameStrength] = useState(100);
 
-  const birthdayMessage = "Happy 47th Birthday, Abeer!";
+  const birthdayMessage = 'Happy 47th Birthday, Abeer!';
 
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
   );
 
-  // 🎵 Audio ref
+  // 🎵 Audio
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
 
-  // -----------------------------
-  // Initialize background music
-  // -----------------------------
-useEffect(() => {
-  if (audioRef.current) return;
+  // --------------------------------------------------
+  // Load audio ONCE, play ONLY on user interaction
+  // --------------------------------------------------
+  useEffect(() => {
+    let cancelled = false;
 
-  let objectUrl: string | null = null;
-
-  const loadAndPlay = async () => {
-    try {
-      const res = await fetch('/fixed.mp3', { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`Audio fetch failed: ${res.status}`);
-      }
-
-      const blob = await res.blob();
-      objectUrl = URL.createObjectURL(blob);
-
-      const audio = new Audio(objectUrl);
-      audio.loop = true;
-      audio.volume = 0.5;
-
-      audioRef.current = audio;
-
+    const loadAudio = async () => {
       try {
-        await audio.play();
-        console.log('Audio playing (blob)');
-      } catch {
-        console.log('Autoplay blocked, waiting for interaction');
+        const res = await fetch('/fixed.mp3', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch audio');
 
-        const resume = () => {
-          audio.play().catch(err =>
-            console.warn('Audio play failed on interaction:', err)
-          );
+        const blob = await res.blob();
+        if (cancelled) return;
+
+        audioUrlRef.current = URL.createObjectURL(blob);
+
+        const startAudio = () => {
+          if (!audioUrlRef.current) return;
+
+          const audio = new Audio(audioUrlRef.current);
+          audio.loop = true;
+          audio.volume = 0.5;
+
+          audio
+            .play()
+            .then(() => {
+              audioRef.current = audio;
+              console.log('🎵 Audio started');
+            })
+            .catch(err => {
+              console.error('Audio play failed:', err);
+            });
+
+          window.removeEventListener('click', startAudio);
+          window.removeEventListener('touchstart', startAudio);
         };
 
-        window.addEventListener('click', resume, { once: true });
-        window.addEventListener('touchstart', resume, { once: true });
+        window.addEventListener('click', startAudio);
+        window.addEventListener('touchstart', startAudio);
+      } catch (e) {
+        console.error('Audio load error:', e);
       }
-    } catch (e) {
-      console.error('Audio load failed:', e);
-    }
-  };
+    };
 
-  loadAndPlay();
+    loadAudio();
 
-  return () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    }
-  };
-}, []);
+    return () => {
+      cancelled = true;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+        audioUrlRef.current = null;
+      }
+    };
+  }, []);
 
-
-  // -----------------------------
+  // --------------------------------------------------
   // Candle physics loop
-  // -----------------------------
+  // --------------------------------------------------
   useEffect(() => {
     if (gameState !== GameState.CELEBRATING || !candlesLit) return;
 
@@ -117,9 +119,9 @@ useEffect(() => {
     return () => cancelAnimationFrame(raf);
   }, [gameState, candlesLit, volume]);
 
-  // -----------------------------
+  // --------------------------------------------------
   // Handlers
-  // -----------------------------
+  // --------------------------------------------------
   const handleSuccess = () => {
     setCandlesLit(false);
     triggerConfetti();
@@ -145,18 +147,12 @@ useEffect(() => {
 
   const handleStart = async () => {
     await initializeAudio();
-
-    // Ensure music is running
-    if (audioRef.current?.paused) {
-      audioRef.current.play().catch(() => {});
-    }
-
     setGameState(GameState.CELEBRATING);
   };
 
-  // -----------------------------
+  // --------------------------------------------------
   // Confetti
-  // -----------------------------
+  // --------------------------------------------------
   const triggerConfetti = () => {
     const end = Date.now() + 3000;
 
@@ -166,7 +162,7 @@ useEffect(() => {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#f472b6', '#fbbf24', '#60a5fa']
+        colors: ['#f472b6', '#fbbf24', '#60a5fa'],
       });
 
       confetti({
@@ -174,7 +170,7 @@ useEffect(() => {
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#f472b6', '#fbbf24', '#60a5fa']
+        colors: ['#f472b6', '#fbbf24', '#60a5fa'],
       });
 
       if (Date.now() < end) requestAnimationFrame(frame);
@@ -186,9 +182,9 @@ useEffect(() => {
   const getMeterColor = () =>
     volume > BLOW_THRESHOLD ? 'bg-red-500' : 'bg-blue-400';
 
-  // -----------------------------
+  // --------------------------------------------------
   // Render
-  // -----------------------------
+  // --------------------------------------------------
   return (
     <div className="relative w-full h-full bg-slate-900 text-white overflow-hidden font-hand select-none">
       {/* 3D Scene */}
@@ -219,7 +215,8 @@ useEffect(() => {
           {gameState === GameState.INTRO && (
             <div className="pointer-events-auto bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center shadow-2xl max-w-md">
               <p className="text-xl mb-6 font-arabic">
-                Welcome to your private party, Abeer! <br />
+                Welcome to your private party, Abeer!
+                <br />
                 We have a cake ready just for you.
               </p>
               <button
