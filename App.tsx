@@ -29,8 +29,9 @@ export default function App() {
 
   // Initialize and Play Audio on Mount
   useEffect(() => {
-    // In Vite/Vercel, files in 'public' are served at root '/'
-    const audio = new Audio('/birthdaysong.mp3');
+    // Use the raw GitHub URL to ensure the audio loads correctly even if the local file is missing from the build
+    const audioUrl = 'https://raw.githubusercontent.com/Momin010/Abeer/main/public/birthdaysong.mp3';
+    const audio = new Audio(audioUrl);
     audio.loop = true;
     audio.volume = 0.5;
     audioRef.current = audio;
@@ -56,7 +57,6 @@ export default function App() {
     };
 
     // We catch the promise here to ensure no "Uncaught (in promise)" logs clutter the console
-    // if the browser policy blocks it immediately.
     playAudio().catch(() => {});
 
     return () => {
