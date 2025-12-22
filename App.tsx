@@ -154,7 +154,7 @@ export default function App() {
           {gameState === GameState.INTRO && (
             <div className="pointer-events-auto bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center shadow-2xl max-w-md animate-[fadeIn_0.5s_ease-out]">
               <div className="text-xl mb-6 font-arabic leading-relaxed text-gray-100">
-                <p className="text-3xl mb-4 font-bold text-yellow-300">عيد ميلاد سعيد يا عبير! ❤️</p>
+                <p className="text-3xl mb-4 font-bold text-yellow-300">عيد ميلاد سعيد يا عمتو عبير! ❤️</p>
                 <p className="text-lg text-gray-200">
                   لقد صنعنا لكِ كعكة خاصة للاحتفال بمناسبة بلوغك ٤٧ عاماً.
                 </p>
