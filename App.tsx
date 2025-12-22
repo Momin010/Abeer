@@ -27,40 +27,60 @@ export default function App() {
   // -----------------------------
   // Initialize background music
   // -----------------------------
-  useEffect(() => {
-    const audio = new Audio('/fixed.mp3');
-    audio.loop = true;
-    audio.volume = 0.5;
-    audio.preload = 'auto';
-    audioRef.current = audio;
+useEffect(() => {
+  if (audioRef.current) return;
 
-    const tryPlay = async () => {
+  let objectUrl: string | null = null;
+
+  const loadAndPlay = async () => {
+    try {
+      const res = await fetch('/fixed.mp3', { cache: 'no-store' });
+      if (!res.ok) {
+        throw new Error(`Audio fetch failed: ${res.status}`);
+      }
+
+      const blob = await res.blob();
+      objectUrl = URL.createObjectURL(blob);
+
+      const audio = new Audio(objectUrl);
+      audio.loop = true;
+      audio.volume = 0.5;
+
+      audioRef.current = audio;
+
       try {
         await audio.play();
-        console.log('Audio autoplay success');
+        console.log('Audio playing (blob)');
       } catch {
-        console.log('Autoplay blocked, waiting for user interaction');
+        console.log('Autoplay blocked, waiting for interaction');
 
         const resume = () => {
           audio.play().catch(err =>
             console.warn('Audio play failed on interaction:', err)
           );
-          window.removeEventListener('click', resume);
-          window.removeEventListener('touchstart', resume);
         };
 
         window.addEventListener('click', resume, { once: true });
         window.addEventListener('touchstart', resume, { once: true });
       }
-    };
+    } catch (e) {
+      console.error('Audio load failed:', e);
+    }
+  };
 
-    tryPlay();
+  loadAndPlay();
 
-    return () => {
-      audio.pause();
+  return () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
       audioRef.current = null;
-    };
-  }, []);
+    }
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+    }
+  };
+}, []);
+
 
   // -----------------------------
   // Candle physics loop
