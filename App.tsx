@@ -40,10 +40,13 @@ export default function App() {
       try {
         await audio.play();
       } catch (err) {
-        console.log("Autoplay blocked. Waiting for interaction.");
-        // Fallback: Play on first user interaction
+        console.log("Autoplay blocked or audio missing. Waiting for interaction.");
+        
+        // Add one-time listener for interaction
         const handleInteraction = () => {
-          audio.play();
+          if (audioRef.current) {
+            audioRef.current.play().catch(e => console.warn("Audio play failed on click:", e));
+          }
           window.removeEventListener('click', handleInteraction);
           window.removeEventListener('touchstart', handleInteraction);
         };
@@ -52,7 +55,9 @@ export default function App() {
       }
     };
 
-    playAudio();
+    // We catch the promise here to ensure no "Uncaught (in promise)" logs clutter the console
+    // if the browser policy blocks it immediately.
+    playAudio().catch(() => {});
 
     return () => {
       audio.pause();
@@ -152,7 +157,7 @@ export default function App() {
     await initializeAudio();
     // Ensure audio is playing if it wasn't already (double check)
     if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play().catch(e => console.error("Audio play failed", e));
+        audioRef.current.play().catch(e => console.warn("Audio play failed on start:", e));
     }
     setGameState(GameState.CELEBRATING);
   };
