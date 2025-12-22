@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { GameState } from './types';
 import { Experience } from './components/Experience';
@@ -20,46 +20,6 @@ export default function App() {
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
   );
-
-  // 🎵 Audio ref
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // -----------------------------
-  // Initialize background music
-  // -----------------------------
-  useEffect(() => {
-    const audio = new Audio('/fixed.ogg'); // Use OGG for Chrome/Vercel compatibility
-    audio.loop = true;
-    audio.volume = 0.5;
-    audioRef.current = audio;
-
-    const playAudio = async () => {
-      try {
-        await audio.play();
-        console.log('Audio playing');
-      } catch {
-        console.log('Autoplay blocked, waiting for user interaction');
-
-        const resume = () => {
-          audio.play().catch(err =>
-            console.warn('Audio play failed on interaction:', err)
-          );
-          window.removeEventListener('click', resume);
-          window.removeEventListener('touchstart', resume);
-        };
-
-        window.addEventListener('click', resume, { once: true });
-        window.addEventListener('touchstart', resume, { once: true });
-      }
-    };
-
-    playAudio();
-
-    return () => {
-      audio.pause();
-      audioRef.current = null;
-    };
-  }, []);
 
   // -----------------------------
   // Candle physics loop
@@ -124,12 +84,6 @@ export default function App() {
 
   const handleStart = async () => {
     await initializeAudio();
-
-    // Ensure music is running
-    if (audioRef.current?.paused) {
-      audioRef.current.play().catch(() => {});
-    }
-
     setGameState(GameState.CELEBRATING);
   };
 
