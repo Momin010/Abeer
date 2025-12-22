@@ -1,26 +1,8 @@
-declare module '*.svg' {
-  const content: string;
-  export default content;
-}
+/// <reference types="vite/client" />
 
-declare module '*.png' {
-  const content: string;
-  export default content;
-}
-
-declare module '*.jpg' {
-  const content: string;
-  export default content;
-}
-
-declare module '*.mp3' {
-  const content: string;
-  export default content;
-}
-
-declare const process: {
-  env: {
+declare namespace NodeJS {
+  interface ProcessEnv {
     API_KEY: string;
     [key: string]: string | undefined;
   }
-};
+}

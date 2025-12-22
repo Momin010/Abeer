@@ -3,7 +3,6 @@ import confetti from 'canvas-confetti';
 import { GameState } from './types';
 import { Experience } from './components/Experience';
 import { useMicrophone } from './hooks/useMicrophone';
-import { generateBirthdayWish } from './services/geminiService';
 
 // --- DIFFICULTY SETTINGS ---
 const BLOW_THRESHOLD = 30;    
@@ -18,7 +17,8 @@ export default function App() {
   // Flame Strength: 100 = full fire, 0 = extinguished
   const [flameStrength, setFlameStrength] = useState(100);
 
-  const [birthdayMessage, setBirthdayMessage] = useState("Happy 47th Birthday, Abeer!");
+  // Static message, no AI
+  const birthdayMessage = "Happy 47th Birthday, Abeer!";
 
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
@@ -26,11 +26,6 @@ export default function App() {
 
   // Audio Reference for Background Music
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // Generate wish on mount
-    generateBirthdayWish().then(setBirthdayMessage);
-  }, []);
 
   // Initialize and Play Audio on Mount
   useEffect(() => {
