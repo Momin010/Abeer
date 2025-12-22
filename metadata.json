@@ -1,0 +1,7 @@
+{
+  "name": "Abeer's 47th Birthday Party",
+  "description": "A personalized 3D birthday celebration with interactive candle blowing.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
