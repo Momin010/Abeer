@@ -15,7 +15,8 @@ export default function App() {
   const [candlesLit, setCandlesLit] = useState(true);
   const [flameStrength, setFlameStrength] = useState(100);
 
-  const birthdayMessage = "Happy 47th Birthday, Abeer!";
+  // Added Arabic to the final message
+  const birthdayMessage = "Happy 47th Birthday, Abeer!\nكل عام وأنتِ بخير يا عبير ❤️";
 
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
@@ -140,9 +141,10 @@ export default function App() {
         <div className="w-full flex justify-between pt-4 px-4">
           <button
             onClick={triggerConfetti}
-            className="pointer-events-auto backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-yellow-300 p-3 rounded-full shadow-lg active:scale-95"
+            className="pointer-events-auto backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-yellow-300 p-3 rounded-full shadow-lg active:scale-95 flex items-center gap-2 font-arabic"
           >
-            🎉 Confetti
+            <span>🎉</span>
+            <span>Confetti / احتفال</span>
           </button>
         </div>
 
@@ -150,16 +152,21 @@ export default function App() {
         <div className="flex-1 flex items-center justify-center">
 
           {gameState === GameState.INTRO && (
-            <div className="pointer-events-auto bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center shadow-2xl max-w-md">
-              <p className="text-xl mb-6 font-arabic">
-                Welcome to your private party, Abeer! <br />
-                We have a cake ready just for you.
-              </p>
+            <div className="pointer-events-auto bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center shadow-2xl max-w-md animate-[fadeIn_0.5s_ease-out]">
+              <div className="text-xl mb-6 font-arabic leading-relaxed text-gray-100">
+                <p className="text-2xl mb-2 font-bold" dir="rtl">عيد ميلاد سعيد يا عبير!</p>
+                <p dir="rtl">لقد صنعنا لكِ كعكة خاصة للاحتقال.</p>
+                <hr className="border-white/20 my-3"/>
+                <p className="text-base font-sans">
+                  Welcome to your private party, Abeer! <br />
+                  We have a cake ready just for you.
+                </p>
+              </div>
               <button
                 onClick={handleStart}
-                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-8 rounded-full hover:scale-110 transition"
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-8 rounded-full hover:scale-110 transition shadow-lg font-arabic text-lg"
               >
-                Let’s Celebrate! 🎂
+                Let’s Celebrate! / هيّا نحتفل 🎂
               </button>
             </div>
           )}
@@ -167,31 +174,31 @@ export default function App() {
           {gameState === GameState.CELEBRATING && (
             <div className="absolute bottom-10 w-full max-w-md flex flex-col items-center gap-4">
 
-              <div className="pointer-events-auto bg-black/40 px-6 py-3 rounded-full">
-                <p className="text-xl text-yellow-300">
+              <div className="pointer-events-auto bg-black/40 backdrop-blur-md px-6 py-4 rounded-3xl border border-white/10">
+                <p className="text-xl text-yellow-300 text-center font-arabic whitespace-pre-line leading-relaxed">
                   {hasPermission
-                    ? 'Blow HARD to put out the candles!'
-                    : 'Tap the cake to blow!'}
+                    ? 'انفخي بقوة لإطفاء الشموع! 💨\nBlow HARD to put out the candles!'
+                    : 'اضغطي على الكعكة للنفخ! 👆\nTap the cake to blow!'}
                 </p>
               </div>
 
               {hasPermission && (
                 <div className="pointer-events-auto w-full px-8">
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
-                    <span>Candle Strength</span>
+                  <div className="flex justify-between text-xs font-bold text-gray-400 mb-1 font-arabic uppercase tracking-widest">
+                    <span>Strength / القوة</span>
                     <span>{Math.round(flameStrength)}%</span>
                   </div>
 
-                  <div className="h-6 bg-gray-800 rounded-full overflow-hidden border">
+                  <div className="h-6 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
                     <div
-                      className="h-full bg-orange-500 transition-all"
+                      className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 transition-all duration-100 ease-out"
                       style={{ width: `${flameStrength}%` }}
                     />
                   </div>
 
                   <div className="mt-2 h-3 bg-gray-900 rounded-full overflow-hidden">
                     <div
-                      className={`h-full ${getMeterColor()}`}
+                      className={`h-full ${getMeterColor()} transition-all duration-75`}
                       style={{ width: `${Math.min(volume * 2, 100)}%` }}
                     />
                   </div>
@@ -203,16 +210,16 @@ export default function App() {
           {gameState === GameState.FINISHED && (
             <button
               onClick={handleRestart}
-              className="pointer-events-auto mt-32 bg-white/20 px-8 py-3 rounded-full font-bold"
+              className="pointer-events-auto mt-32 backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/20 text-white px-8 py-3 rounded-full transition text-lg font-bold shadow-xl font-arabic"
             >
-              Restart / إعادة
+              Restart / إعادة المحاولة 🔄
             </button>
           )}
         </div>
 
         {gameState === GameState.FINISHED && (
-          <div className="absolute bottom-6 left-6 max-w-2xl">
-            <h1 className="text-3xl md:text-5xl font-arabic text-yellow-300">
+          <div className="absolute bottom-6 left-0 right-0 md:left-12 md:right-auto text-center md:text-left z-20 pointer-events-none p-4">
+             <h1 className="text-4xl md:text-6xl font-bold font-arabic text-yellow-300 drop-shadow-[0_4px_15px_rgba(251,191,36,0.6)] leading-tight whitespace-pre-line animate-[fadeIn_1s_ease-out]">
               {birthdayMessage}
             </h1>
           </div>
