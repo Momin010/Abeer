@@ -16,7 +16,7 @@ export default function App() {
   const [flameStrength, setFlameStrength] = useState(100);
 
   // Added Arabic to the final message
-  const birthdayMessage = "Happy 47th Birthday, Abeer!\nكل عام وأنتِ بخير يا عبير ❤️";
+  const birthdayMessage = "كل عام وأنتِ بخير يا عمتو عبير💖 ";
 
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
