@@ -1,12 +1,3 @@
 {
-  "headers": [
-    {
-      "source": "/fixed.mp3",
-      "headers": [
-        { "key": "Content-Type", "value": "audio/mpeg" },
-        { "key": "Cache-Control", "value": "no-store" },
-        { "key": "Accept-Ranges", "value": "bytes" }
-      ]
-    }
-  ]
+  "headers": []
 }

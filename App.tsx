@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { GameState } from './types';
 import { Experience } from './components/Experience';
@@ -8,23 +8,38 @@ import { useMicrophone } from './hooks/useMicrophone';
 const BLOW_THRESHOLD = 30;
 const REGEN_RATE = 0.5;
 const DAMAGE_MULTIPLIER = 0.8;
-// ---------------------------
+const MUSIC_URL = "https://res.cloudinary.com/dfgtsi0ff/video/upload/v1766412980/birthdaysong_acuwls.mp3";
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState>(GameState.INTRO);
   const [candlesLit, setCandlesLit] = useState(true);
   const [flameStrength, setFlameStrength] = useState(100);
+  
+  // Create a persistent reference for the audio object
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Added Arabic to the final message
-  const birthdayMessage = "كل عام وأنتِ بخير يا عمتو عبير💖 ";
+  const birthdayMessage = "كل عام وأنتِ بخير يا عبير ❤️";
 
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
   );
 
-  // -----------------------------
+  // Initialize audio object once on mount
+  useEffect(() => {
+    audioRef.current = new Audio(MUSIC_URL);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.5;
+
+    return () => {
+      // Cleanup on unmount
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   // Candle physics loop
-  // -----------------------------
   useEffect(() => {
     if (gameState !== GameState.CELEBRATING || !candlesLit) return;
 
@@ -33,7 +48,6 @@ export default function App() {
     const update = () => {
       setFlameStrength(prev => {
         let delta = 0;
-
         if (volume > BLOW_THRESHOLD) {
           delta = -(volume - BLOW_THRESHOLD) * DAMAGE_MULTIPLIER;
         } else {
@@ -41,15 +55,12 @@ export default function App() {
         }
 
         const next = Math.max(0, Math.min(100, prev + delta));
-
         if (next <= 0) {
           handleSuccess();
           return 0;
         }
-
         return next;
       });
-
       raf = requestAnimationFrame(update);
     };
 
@@ -57,9 +68,7 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [gameState, candlesLit, volume]);
 
-  // -----------------------------
   // Handlers
-  // -----------------------------
   const handleSuccess = () => {
     setCandlesLit(false);
     triggerConfetti();
@@ -67,6 +76,10 @@ export default function App() {
   };
 
   const handleRestart = () => {
+    // Reset audio if you want it to restart or keep playing
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+    }
     setCandlesLit(true);
     setFlameStrength(100);
     setGameState(GameState.INTRO);
@@ -84,16 +97,18 @@ export default function App() {
   };
 
   const handleStart = async () => {
+    // 1. Play the music (this works now because it's inside a click handler)
+    if (audioRef.current) {
+      audioRef.current.play().catch(err => console.log("Audio play failed:", err));
+    }
+    
+    // 2. Start Microphone
     await initializeAudio();
     setGameState(GameState.CELEBRATING);
   };
 
-  // -----------------------------
-  // Confetti
-  // -----------------------------
   const triggerConfetti = () => {
     const end = Date.now() + 3000;
-
     const frame = () => {
       confetti({
         particleCount: 8,
@@ -102,7 +117,6 @@ export default function App() {
         origin: { x: 0 },
         colors: ['#f472b6', '#fbbf24', '#60a5fa']
       });
-
       confetti({
         particleCount: 8,
         angle: 120,
@@ -110,19 +124,13 @@ export default function App() {
         origin: { x: 1 },
         colors: ['#f472b6', '#fbbf24', '#60a5fa']
       });
-
       if (Date.now() < end) requestAnimationFrame(frame);
     };
-
     frame();
   };
 
-  const getMeterColor = () =>
-    volume > BLOW_THRESHOLD ? 'bg-red-500' : 'bg-blue-400';
+  const getMeterColor = () => volume > BLOW_THRESHOLD ? 'bg-red-500' : 'bg-blue-400';
 
-  // -----------------------------
-  // Render
-  // -----------------------------
   return (
     <div className="relative w-full h-full bg-slate-900 text-white overflow-hidden font-hand select-none">
       {/* 3D Scene */}
@@ -134,31 +142,30 @@ export default function App() {
         />
       </div>
 
-      {/* UI */}
+      {/* UI Layer */}
       <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-6">
-
-        {/* Header */}
+        
+        {/* Header - Added a Mute Toggle here just in case */}
         <div className="w-full flex justify-between pt-4 px-4">
           <button
             onClick={triggerConfetti}
             className="pointer-events-auto backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-yellow-300 p-3 rounded-full shadow-lg active:scale-95 flex items-center gap-2 font-arabic"
           >
             <span>🎉</span>
-            <span>Confetti / احتفال</span>
+            <span>Celebrate / احتفال</span>
           </button>
         </div>
 
-        {/* Center */}
+        {/* Center UI */}
         <div className="flex-1 flex items-center justify-center">
-
           {gameState === GameState.INTRO && (
             <div className="pointer-events-auto bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center shadow-2xl max-w-md animate-[fadeIn_0.5s_ease-out]">
               <div className="text-xl mb-6 font-arabic leading-relaxed text-gray-100">
                 <p className="text-2xl mb-2 font-bold" dir="rtl">عيد ميلاد سعيد يا عبير!</p>
-                <p dir="rtl">لقد صنعنا لكِ كعكة خاصة للاحتقال.</p>
+                <p dir="rtl">لقد صنعنا لكِ كعكة خاصة للاحتفال.</p>
                 <hr className="border-white/20 my-3"/>
                 <p className="text-base font-sans">
-                  Welcome to your private party, Abeer! <br />
+                  Happy Birthday, Abeer! <br />
                   We have a cake ready just for you.
                 </p>
               </div>
@@ -173,7 +180,6 @@ export default function App() {
 
           {gameState === GameState.CELEBRATING && (
             <div className="absolute bottom-10 w-full max-w-md flex flex-col items-center gap-4">
-
               <div className="pointer-events-auto bg-black/40 backdrop-blur-md px-6 py-4 rounded-3xl border border-white/10">
                 <p className="text-xl text-yellow-300 text-center font-arabic whitespace-pre-line leading-relaxed">
                   {hasPermission
@@ -188,14 +194,12 @@ export default function App() {
                     <span>Strength / القوة</span>
                     <span>{Math.round(flameStrength)}%</span>
                   </div>
-
                   <div className="h-6 bg-gray-800 rounded-full overflow-hidden border border-gray-600">
                     <div
                       className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 transition-all duration-100 ease-out"
                       style={{ width: `${flameStrength}%` }}
                     />
                   </div>
-
                   <div className="mt-2 h-3 bg-gray-900 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${getMeterColor()} transition-all duration-75`}
@@ -217,6 +221,7 @@ export default function App() {
           )}
         </div>
 
+        {/* Success Message */}
         {gameState === GameState.FINISHED && (
           <div className="absolute bottom-6 left-0 right-0 md:left-12 md:right-auto text-center md:text-left z-20 pointer-events-none p-4">
              <h1 className="text-4xl md:text-6xl font-bold font-arabic text-yellow-300 drop-shadow-[0_4px_15px_rgba(251,191,36,0.6)] leading-tight whitespace-pre-line animate-[fadeIn_1s_ease-out]">
