@@ -17,8 +17,8 @@ export default function App() {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Updated to Arabic only and formatted for the new size
-  const birthdayMessage = "كل عام وأنتِ بخير يا عمتو عبير ❤️\n٤٧ عاماً من الفرح والسعادة 🎉";
+  // Religious/Blessing Message
+  const birthdayMessage = "كل عام وأنتِ إلى الله أقرب وأتقى ❤️\nأسأل الله أن يبارك في عمرك وعملك ✨";
 
   const { initializeAudio, hasPermission, volume } = useMicrophone(
     gameState === GameState.CELEBRATING
@@ -154,16 +154,16 @@ export default function App() {
           {gameState === GameState.INTRO && (
             <div className="pointer-events-auto bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 text-center shadow-2xl max-w-md animate-[fadeIn_0.5s_ease-out]">
               <div className="text-xl mb-6 font-arabic leading-relaxed text-gray-100">
-                <p className="text-3xl mb-4 font-bold text-yellow-300">عيد ميلاد سعيد يا عمتو عبير! ❤️</p>
+                <p className="text-3xl mb-4 font-bold text-yellow-300">مبارك عليكِ العام الجديد يا عبير 🌙</p>
                 <p className="text-lg text-gray-200">
-                  لقد صنعنا لكِ كعكة خاصة للاحتفال بمناسبة بلوغك ٤٧ عاماً.
+                  نسأل الله أن يجعله عام خير وبركة، وأن يرزقكِ فيه السعادة والرضا.
                 </p>
               </div>
               <button
                 onClick={handleStart}
                 className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-10 rounded-full hover:scale-105 transition shadow-lg font-arabic text-xl"
               >
-                هيّا نحتفل! 🎂
+                بسم الله نبدأ 🎂
               </button>
             </div>
           )}
@@ -173,7 +173,7 @@ export default function App() {
               <div className="pointer-events-auto bg-black/40 backdrop-blur-md px-6 py-4 rounded-3xl border border-white/10">
                 <p className="text-xl text-yellow-300 text-center font-arabic whitespace-pre-line leading-relaxed">
                   {hasPermission
-                    ? 'انفخي بقوة لإطفاء الشموع! 💨'
+                    ? 'انفخي الشموع واستبشري خيراً! 💨'
                     : 'اضغطي على الكعكة للنفخ! 👆'}
                 </p>
               </div>
@@ -206,15 +206,15 @@ export default function App() {
               onClick={handleRestart}
               className="pointer-events-auto mt-32 backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/20 text-white px-6 py-2 rounded-full transition text-base font-bold shadow-xl font-arabic hover:scale-105"
             >
-              إعادة المحاولة 
+              إعادة 🔄
             </button>
           )}
         </div>
 
-        {/* Success Message - Smaller Text */}
+        {/* Success Message - Religious Text */}
         {gameState === GameState.FINISHED && (
           <div className="absolute bottom-12 left-0 right-0 z-20 pointer-events-none p-4 flex justify-center">
-             <h1 className="text-2xl md:text-4xl font-bold font-arabic text-yellow-300 drop-shadow-[0_4px_15px_rgba(251,191,36,0.6)] leading-relaxed text-center animate-[fadeIn_1s_ease-out] whitespace-pre-line bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/10">
+             <h1 className="text-2xl md:text-3xl font-bold font-arabic text-yellow-300 drop-shadow-[0_4px_15px_rgba(251,191,36,0.6)] leading-loose text-center animate-[fadeIn_1s_ease-out] whitespace-pre-line bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/10">
               {birthdayMessage}
             </h1>
           </div>

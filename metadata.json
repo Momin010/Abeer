@@ -1,6 +1,6 @@
 {
-  "name": "Abeer's 47th Birthday Party",
-  "description": "A personalized 3D birthday celebration with interactive candle blowing.",
+  "name": "Abeer's Blessed Birthday",
+  "description": "A personalized 3D celebration with prayers and blessings.",
   "requestFramePermissions": [
     "microphone"
   ]
